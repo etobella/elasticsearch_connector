@@ -7,6 +7,7 @@
     'category': 'Elasticsearch connector',
     'depends': [
         'elasticsearch_connector_base',
+        'account',
     ],
     'author': 'Creu Blanca',
     'license': 'AGPL-3',
