@@ -6,6 +6,7 @@ from odoo import api, fields, models
 
 class ElasticsearchModel(models.AbstractModel):
     _name = 'elasticsearch.model'
+    _inherit = 'elasticsearch.include.model'
     _binding_name = False
 
     elasticsearch_bind_ids = fields.One2many(
@@ -25,14 +26,14 @@ class ElasticsearchModel(models.AbstractModel):
     def bind_values(self, backend, elasticsearch_model):
         return {
             'odoo_id': self.id,
-            'elasticsearch_model': elasticsearch_model,
             'backend_id': backend.id,
+            'index': elasticsearch_model,
+            'doc_type': elasticsearch_model
         }
 
     @api.multi
     def get_binds(self, backend):
         """
-
         :return: list of the bind values
         """
         self.ensure_one()

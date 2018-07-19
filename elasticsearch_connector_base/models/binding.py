@@ -11,7 +11,6 @@ class ElasticsearchBinding(models.AbstractModel):
     _name = 'elasticsearch.binding'
     _inherit = 'external.binding'
     _description = 'Elasticsearch abstract Binding'
-    _elasticsearch_fields = []
 
     odoo_id = fields.Many2one(
         required=True,
@@ -62,10 +61,8 @@ class ElasticsearchBinding(models.AbstractModel):
                 sync_date=date
             )
 
-    @api.model
-    def get_fields(self):
-        return ['id', 'write_date', 'write_uid', 'create_date', 'create_uid']
-
     def get_binding_values(self):
-        flds = list(set(self._elasticsearch_fields + self.get_fields()))
-        return self.odoo_id.read(flds, load=False)[0]
+        res = self.odoo_id.get_elasticsearch_values()
+        import logging
+        logging.info(res)
+        return res

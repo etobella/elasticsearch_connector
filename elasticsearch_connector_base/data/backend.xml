@@ -2,5 +2,7 @@
 <odoo>
     <record id="elasticsearch" model="elasticsearch.backend">
         <field name="name">Elasticsearch</field>
+        <field name="destination">localhost</field>
+        <field name="port">9200</field>
     </record>
 </odoo>

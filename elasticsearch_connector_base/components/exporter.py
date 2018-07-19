@@ -3,8 +3,7 @@
 
 import logging
 import psycopg2
-import simplejson
-import requests
+import json
 from datetime import datetime
 
 import odoo
@@ -57,7 +56,8 @@ class ElasticsearchBaseExporter(AbstractComponent):
         doc_type = binding.doc_type
         es = elasticsearch.Elasticsearch(
             hosts=binding.backend_id.get_hosts())
-        data = simplejson.dumps(kwargs['data'])
+        data = json.dumps(kwargs['data'])
+        logging.info(data)
         es.create(index, doc_type, binding.id, body=data)
         binding.sync_date = kwargs['sync_date']
         if not odoo.tools.config['test_enable']:
@@ -114,7 +114,8 @@ class ElasticsearchBaseExporter(AbstractComponent):
             doc_type = binding.doc_type
             es = elasticsearch.Elasticsearch(
                 hosts=binding.backend_id.get_hosts())
-            data = simplejson.dumps(kwargs['data'])
+            data = json.dumps(kwargs['data'])
+            logging.info(data)
             es.update(index, doc_type, binding.id, body=data)
             binding.sync_date = kwargs['sync_date']
             if not odoo.tools.config['test_enable']:
