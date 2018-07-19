@@ -3,6 +3,7 @@
 
 from odoo import models
 
+
 class AccountJournal(models.Model):
     _name = 'account.account'
     _inherit = ['account.account', 'elasticsearch.include.model']

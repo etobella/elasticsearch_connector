@@ -9,10 +9,14 @@ from datetime import datetime
 import odoo
 from odoo.addons.component.core import AbstractComponent
 from odoo.addons.connector.exception import RetryableJobError
-import elasticsearch
+
+_logger = logging.getLogger(__name__)
+try:
+    import elasticsearch
+except (ImportError, IOError) as err:
+    _logger.debug(err)
 
 ISO_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'
-_logger = logging.getLogger(__name__)
 
 
 class ElasticsearchBaseExporter(AbstractComponent):
@@ -50,22 +54,21 @@ class ElasticsearchBaseExporter(AbstractComponent):
                 (self.model._name, binding.id),
                 seconds=self._exporter_failure_timeout)
 
-    def create(self, binding, *args, **kwargs):
+    def es_create(self, binding, *args, **kwargs):
         self._lock(binding)
         index = binding.index
         doc_type = binding.doc_type
         es = elasticsearch.Elasticsearch(
             hosts=binding.backend_id.get_hosts())
         data = json.dumps(kwargs['data'])
-        logging.info(data)
         es.create(index, doc_type, binding.id, body=data)
         binding.sync_date = kwargs['sync_date']
         if not odoo.tools.config['test_enable']:
-            self.env.cr.commit()  # noqa
+            self.env.cr.commit()  # pylint: disable=E8102
         self._after_export()
         return True
 
-    def delete(self, binding, *args, **kwargs):
+    def es_unlink(self, binding, *args, **kwargs):
         """ Run the synchronization
         :param binding: binding record to export
         """
@@ -81,9 +84,6 @@ class ElasticsearchBaseExporter(AbstractComponent):
                 hosts=binding.backend_id.get_hosts())
             es.delete(index, doc_type, binding.id)
             binding.sync_date = kwargs['sync_date']
-            if not odoo.tools.config['test_enable']:
-                self.env.cr.commit()  # noqa
-            binding.sync_date = kwargs['sync_date']
         else:
             _logger.info(
                 'Record from %s with id %s has already been sended (%s), so it'
@@ -96,11 +96,11 @@ class ElasticsearchBaseExporter(AbstractComponent):
         # The commit will also release the lock acquired on the binding
         # record
         if not odoo.tools.config['test_enable']:
-            self.env.cr.commit()  # noqa
+            self.env.cr.commit()  # pylint: disable=E8102
         self._after_export()
         return True
 
-    def update(self, binding, *args, **kwargs):
+    def es_write(self, binding, *args, **kwargs):
         """ Run the synchronization
         :param binding: binding record to export
         """
@@ -118,9 +118,6 @@ class ElasticsearchBaseExporter(AbstractComponent):
             logging.info(data)
             es.update(index, doc_type, binding.id, body=data)
             binding.sync_date = kwargs['sync_date']
-            if not odoo.tools.config['test_enable']:
-                self.env.cr.commit()  # noqa
-            binding.sync_date = kwargs['sync_date']
         else:
             _logger.info(
                 'Record from %s with id %s has already been sended (%s), so it'
@@ -133,7 +130,7 @@ class ElasticsearchBaseExporter(AbstractComponent):
         # The commit will also release the lock acquired on the binding
         # record
         if not odoo.tools.config['test_enable']:
-            self.env.cr.commit()  # noqa
+            self.env.cr.commit()  # pylint: disable=E8102
         self._after_export()
         return True
 

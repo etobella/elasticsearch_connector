@@ -33,7 +33,7 @@ class ElasticsearchBinding(models.AbstractModel):
         self.ensure_one()
         with self.backend_id.work_on(self._name) as work:
             exporter = work.component(usage='record.exporter')
-            return exporter.create(
+            return exporter.es_create(
                 self,
                 data=self.get_binding_values(),
                 sync_date=date)
@@ -44,7 +44,7 @@ class ElasticsearchBinding(models.AbstractModel):
         self.ensure_one()
         with self.backend_id.work_on(self._name) as work:
             exporter = work.component(usage='record.exporter')
-            return exporter.update(
+            return exporter.es_write(
                 self,
                 data=self.get_binding_values(),
                 sync_date=date)
@@ -55,14 +55,11 @@ class ElasticsearchBinding(models.AbstractModel):
         self.ensure_one()
         with self.backend_id.work_on(self._name) as work:
             exporter = work.component(usage='record.exporter')
-            return exporter.delete(
+            return exporter.es_unlink(
                 self,
                 document_id=self.elasticsearch_document_id,
                 sync_date=date
             )
 
     def get_binding_values(self):
-        res = self.odoo_id.get_elasticsearch_values()
-        import logging
-        logging.info(res)
-        return res
+        return self.odoo_id.get_elasticsearch_values()

@@ -1,10 +1,7 @@
 # Copyright 2017 Creu Blanca
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 
-from odoo import api, fields, models
-from odoo.addons.server_environment import serv_config
-
-BUS_SECTION = 'elasticsearch'
+from odoo import fields, models
 
 
 class ElasticsearchBackend(models.Model):
