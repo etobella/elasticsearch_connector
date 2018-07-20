@@ -18,6 +18,8 @@ class Base(models.AbstractModel):
             self.get_elasticsearch_fields()))
         vals = self.read(flds, load=False)[0]
         for field in flds:
+            if not vals.get(field, False):
+                del vals[field]
             if vals.get(field, False) and isinstance(
                     self._fields.get(field), fields.Many2one
             ) and getattr(self, field):
