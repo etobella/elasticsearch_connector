@@ -17,7 +17,6 @@ class ElasticsearchBinding(models.AbstractModel):
         comodel_name='elasticsearch.model',
     )
     index = fields.Char()
-    doc_type = fields.Char()
     backend_id = fields.Many2one(
         comodel_name='elasticsearch.backend',
         string='CB Backend',

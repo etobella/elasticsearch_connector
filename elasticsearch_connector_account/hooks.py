@@ -3,7 +3,7 @@
 from odoo import api, SUPERUSER_ID
 from datetime import datetime
 
-models = ['account.move.line']
+models = ['account.move.line', 'account.invoice']
 
 
 def post_init_hook(cr, registry):

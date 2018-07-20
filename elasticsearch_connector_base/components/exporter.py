@@ -57,11 +57,10 @@ class ElasticsearchBaseExporter(AbstractComponent):
     def es_create(self, binding, *args, **kwargs):
         self._lock(binding)
         index = binding.index
-        doc_type = binding.doc_type
         es = elasticsearch.Elasticsearch(
             hosts=binding.backend_id.get_hosts())
         data = json.dumps(kwargs['data'])
-        es.create(index, doc_type, binding.id, body=data)
+        es.create(index, '_doc', binding.id, body=data)
         binding.sync_date = kwargs['sync_date']
         if not odoo.tools.config['test_enable']:
             self.env.cr.commit()  # pylint: disable=E8102
@@ -79,10 +78,9 @@ class ElasticsearchBaseExporter(AbstractComponent):
             sync_date >= datetime.strptime(binding.sync_date, ISO_FORMAT)
         ):
             index = binding.index
-            doc_type = binding.doc_type
             es = elasticsearch.Elasticsearch(
                 hosts=binding.backend_id.get_hosts())
-            es.delete(index, doc_type, binding.id)
+            es.delete(index, '_doc', binding.id)
             binding.sync_date = kwargs['sync_date']
         else:
             _logger.info(
@@ -111,12 +109,11 @@ class ElasticsearchBaseExporter(AbstractComponent):
             sync_date >= datetime.strptime(binding.sync_date, ISO_FORMAT)
         ):
             index = binding.index
-            doc_type = binding.doc_type
             es = elasticsearch.Elasticsearch(
                 hosts=binding.backend_id.get_hosts())
-            data = json.dumps(kwargs['data'])
+            data = json.dumps({'doc': kwargs['data']})
             logging.info(data)
-            es.update(index, doc_type, binding.id, body=data)
+            es.update(index, '_doc', binding.id, body=data)
             binding.sync_date = kwargs['sync_date']
         else:
             _logger.info(

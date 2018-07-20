@@ -27,8 +27,7 @@ class ElasticsearchModel(models.AbstractModel):
         return {
             'odoo_id': self.id,
             'backend_id': backend.id,
-            'index': elasticsearch_model,
-            'doc_type': elasticsearch_model
+            'index': elasticsearch_model
         }
 
     @api.multi

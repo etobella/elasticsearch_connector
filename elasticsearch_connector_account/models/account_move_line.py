@@ -5,7 +5,7 @@ from odoo import models, fields
 from odoo.addons.component.core import Component
 
 
-class BusBindingAccountJournal(models.Model):
+class BusBindingAccountMoveLine(models.Model):
     _name = 'elasticsearch.binding.account.move.line'
     _inherit = 'elasticsearch.binding'
     _description = 'Account Move line Bus Binding'
@@ -17,7 +17,7 @@ class BusBindingAccountJournal(models.Model):
     )
 
 
-class AccountJournal(models.Model):
+class AccountMoveLine(models.Model):
     _name = 'account.move.line'
     _inherit = ['account.move.line', 'elasticsearch.model']
     _binding_name = 'account_move_line'
@@ -31,13 +31,13 @@ class AccountJournal(models.Model):
     )
 
 
-class AccountJournalBusListener(Component):
+class AccountMoveLineBusListener(Component):
     _name = 'account.move.line.elasticsearch.listener'
     _inherit = 'abstract.elasticsearch.listener'
     _apply_on = ['account.move.line']
 
 
-class BusBindingAccountJournalExporter(Component):
+class BusBindingAccountMoveLineExporter(Component):
     _name = 'elasticsearch.binding.account.move.line.exporter'
     _inherit = 'elasticsearch.base.exporter'
     _apply_on = ['elasticsearch.binding.account.move.line']
