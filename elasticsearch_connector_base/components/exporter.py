@@ -61,7 +61,7 @@ class ElasticsearchBaseExporter(Component):
         es = elasticsearch.Elasticsearch(
             hosts=document.index_id.get_hosts())
         data = json.dumps(kwargs['data'])
-        es.index(index, '_doc', document.id, body=data)
+        es.index(index, '_doc', id=document.id, body=data)
         document.with_context(no_elasticserach_sync=True).write({
             'sync_date': kwargs['sync_date']
         })
@@ -93,7 +93,7 @@ class ElasticsearchBaseExporter(Component):
             es = elasticsearch.Elasticsearch(
                 hosts=document.index_id.get_hosts())
             data = json.dumps({'doc': kwargs['data']})
-            es.index(index, '_doc', document.id, body=data)
+            es.index(index, '_doc', id=document.id, body=data)
             document.with_context(no_elasticserach_sync=True).write({
                 'sync_date': kwargs['sync_date']
             })
