@@ -38,9 +38,14 @@
                             <field name="domain"/>
                         </group>
                     </group>
-                    <group>
-                        <field name="host_ids" options="{'no_create': True}"/>
-                    </group>
+                    <notebook>
+                        <page name="host" string="Hosts">
+                            <field name="host_ids" options="{'no_create': True}"/>
+                        </page>
+                        <page name="fields" string="Fields">
+                            <field name="document_field_ids" context="{'default_index_id': active_id}"/>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>

@@ -56,6 +56,12 @@ class ElasticsearchIndex(models.Model):
         inverse_name='index_id',
         readonly=True
     )
+    document_field_ids = fields.One2many(
+        'elasticsearch.document.field',
+        inverse_name='index_id',
+        readonly=True,
+        states={'draft': [('readonly', False)]},
+    )
 
     def _post_values(self):
         return {'state': 'posted'}

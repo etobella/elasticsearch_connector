@@ -56,7 +56,7 @@ class ElasticsearchDocument(models.Model):
             return exporter.es_unlink(id, index)
 
     def get_document_values(self):
-        return {
-            'id': self.id,
-            'element_id': self.odoo_id
-        }
+        return self.env[self.model].browse(self.odoo_id).read_elasticsearch(
+            self.index_id.document_field_ids.filtered(
+                lambda r: not r.parent_id)
+        )
