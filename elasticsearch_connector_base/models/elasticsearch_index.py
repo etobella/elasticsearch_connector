@@ -111,7 +111,7 @@ class ElasticsearchIndex(models.Model):
         logging.info("Deleting")
         for document in documents:
             self.env['elasticsearch.document'].browse(
-                 documents[document]).unlink()
+                documents[document]).unlink()
         logging.info("Creating")
         for create in creates:
             self.env['elasticsearch.document'].create({
