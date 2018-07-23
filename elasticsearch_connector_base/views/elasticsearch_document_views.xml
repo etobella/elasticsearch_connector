@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="elasticsearch_document_tree" model="ir.ui.view">
+        <field name="name">elasticsearch.document.tree</field>
+        <field name="model">elasticsearch.document</field>
+        <field name="arch" type="xml">
+            <tree string="Documents" create="false" delete="false" edit="false">
+                <field name="model"/>
+                <field name="odoo_id"/>
+                <field name="index_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="elasticsearch_document_form" model="ir.ui.view">
+        <field name="name">elasticsearch.document.form</field>
+        <field name="model">elasticsearch.document</field>
+        <field name="arch" type="xml">
+            <form string="Document" create="false" delete="false" edit="false">
+                <sheet>
+                    <group>
+                        <group>
+                <field name="model"/>
+                <field name="odoo_id"/>
+                <field name="index_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="elasticsearch_document_action">
+        <field name="name">Documents</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">elasticsearch.document</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{}</field>
+    </record>
+
+    <menuitem id="elasticsearch_document_menu"
+              name="Documents"
+              sequence="10"
+              parent="elasticsearch_config"
+              action="elasticsearch_document_action"
+    />
+</odoo>

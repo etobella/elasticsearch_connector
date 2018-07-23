@@ -11,4 +11,4 @@ class BaseElasticsearchConnectorComponent(AbstractComponent):
 
     _name = 'base.elasticsearch.connector'
     _inherit = 'base.connector'
-    _collection = 'elasticsearch.backend'
+    _collection = 'elasticsearch.index'

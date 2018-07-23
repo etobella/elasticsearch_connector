@@ -1,34 +1,32 @@
 # Copyright 2017 Creu Blanca
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 
-from odoo.addons.component.core import AbstractComponent
+from odoo.addons.component.core import Component
 from datetime import datetime
 
 
-class AbstractElasticsearchListener(AbstractComponent):
-    _name = 'abstract.elasticsearch.listener'
+class AbstractElasticsearchListener(Component):
+    _name = 'elasticsearch.document.listener'
     _inherit = 'base.event.listener'
-    _apply_on = False
+    _apply_on = 'elasticsearch.document'
 
     def on_record_create(self, record, fields):
+        if self.env.context.get('no_elasticserach_sync', False):
+            return
         for rec in record:
-            for backend in rec.get_backends():
-                for vals in rec.get_binds(backend):
-                    import logging
-                    logging.info(vals)
-                    binding = self.env[rec.get_binding_model()].create(vals)
-                    binding.with_delay().export_create(
-                        datetime.now().isoformat())
+            rec.with_delay().export_create(datetime.now().isoformat())
 
     def on_record_write(self, record, fields):
+        if self.env.context.get('no_elasticserach_sync', False):
+            return
         for rec in record:
-            if rec._fields.get('elasticsearch_bind_ids'):
-                for binding in rec.elasticsearch_bind_ids:
-                    binding.with_delay().export_update(
-                        datetime.now().isoformat())
+            rec.with_delay().export_update(datetime.now().isoformat())
 
     def on_record_unlink(self, record):
+        if self.env.context.get('no_elasticserach_sync', False):
+            return
+        if self.env.context.get('no_elasticsearch_delay', False):
+            for rec in record:
+                rec.export_delete(rec.id, rec.index_id)
         for rec in record:
-            for binding in rec.elasticsearch_bind_ids:
-                binding.with_delay().export_delete(
-                    datetime.now().isoformat())
+            rec.with_delay()

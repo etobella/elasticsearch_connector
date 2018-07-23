@@ -12,8 +12,11 @@
     'license': 'AGPL-3',
     'summary': 'Elasticsearch connector base',
     'data': [
-        'data/backend.xml',
         'security/ir.model.access.csv',
+        'views/menu.xml',
+        'views/elasticsearch_host_views.xml',
+        'views/elasticsearch_index_views.xml',
+        'views/elasticsearch_document_views.xml',
     ],
     'external_dependencies': {
         'python': [
