@@ -10,6 +10,7 @@ try:
 except (ImportError, IOError) as err:
     _logger.debug(err)
 
+
 class ElasticsearchIndex(models.Model):
     _name = 'elasticsearch.index'
     _description = 'Elasticsearch Index'

@@ -1,10 +1,6 @@
 # Copyright 2017 Creu Blanca
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
-
-from datetime import datetime
-
 from odoo import api, models, fields
-from odoo.addons.queue_job.job import job
 
 
 class ElasticsearchDocument(models.Model):

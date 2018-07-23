@@ -74,8 +74,7 @@ class ElasticsearchBaseExporter(Component):
         """ Run the synchronization
         :param binding: binding record to export
         """
-        es = elasticsearch.Elasticsearch(
-           hosts=index.get_hosts())
+        es = elasticsearch.Elasticsearch(hosts=index.get_hosts())
         es.delete(index.index, '_doc', id)
         self._after_export()
         return True
