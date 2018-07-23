@@ -2,6 +2,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 from datetime import datetime, date
 from odoo import models
+from odoo.fields import Datetime
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
 
@@ -33,11 +34,14 @@ class Base(models.AbstractModel):
         )
         res = self.read(usual_fields.mapped('field_id').mapped('name'))[0]
         # Datetime fields must be converted to isoformat.
-        for field in usual_fields:
-            if res.get(field, False) and isinstance(
-                self._fields.get(field), fields.Datetime
+        for field in usual_fields.mapped('field_id').mapped('name'):
+            if isinstance(
+                self._fields.get(field), Datetime
             ):
-                res[field] = self.to_datetime(res[field]).isoformat()
+                if res[field]:
+                    res[field] = to_datetime(res[field]).isoformat()
+                else:
+                    del res[field]
         for field in x2many_fields:
             vals = []
             child_fields = field.child_ids

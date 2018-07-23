@@ -73,7 +73,7 @@ class ElasticsearchIndex(models.Model):
     def _reset_index(self):
         self.ensure_one()
         es = elasticsearch.Elasticsearch(hosts=self.get_hosts())
-        self.document_ids.with_context(no_elasticsearch_delay=True).unlink()
+        self.document_ids.with_context(no_elasticserach_sync=True).unlink()
         es.indices.delete(index=self.index, ignore=[400, 404])
         self.state = 'cancelled'
 
