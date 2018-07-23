@@ -67,8 +67,16 @@ class ElasticsearchIndex(models.Model):
     def _post_values(self):
         return {'state': 'posted'}
 
+    def _post(self):
+        es = elasticsearch.Elasticsearch(hosts=self.get_hosts())
+        es.indices.create(
+            self.index,
+            body={"settings": {"index.mapping.ignore_malformed": True}})
+
     @api.multi
     def post(self):
+        self.ensure_one()
+        self._post()
         self.write(self._post_values())
 
     def _reset_index(self):
