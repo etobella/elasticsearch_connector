@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="elasticsearch_host_tree" model="ir.ui.view">
+        <field name="name">elasticsearch.host.tree</field>
+        <field name="model">elasticsearch.host</field>
+        <field name="arch" type="xml">
+            <tree string="Hosts">
+                <field name="host"/>
+                <field name="port"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="elasticsearch_host_form" model="ir.ui.view">
+        <field name="name">elasticsearch.host.form</field>
+        <field name="model">elasticsearch.host</field>
+        <field name="arch" type="xml">
+            <form string="Host">
+                <sheet>
+                    <group>
+                        <field name="host"/>
+                        <field name="port"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="elasticsearch_host_action">
+        <field name="name">Hosts</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">elasticsearch.host</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{}</field>
+    </record>
+
+    <menuitem id="elasticsearch_host_menu"
+              name="Hosts"
+              sequence="90"
+              parent="elasticsearch_config"
+              action="elasticsearch_host_action"
+    />
+</odoo>

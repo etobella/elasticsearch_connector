@@ -13,33 +13,10 @@ except (ImportError, IOError) as err:
 
 
 class ElasticsearchIndex(models.Model):
-    _name = 'elasticsearch.index'
-    _description = 'Elasticsearch Index'
-    _inherit = 'connector.backend'
+    _inherit = 'elasticsearch.index'
 
-    name = fields.Char(
-
-        required=True, readonly=True, states={'draft': [('readonly', False)]},
-    )
-    state = fields.Selection([
-        ('draft', 'Draft'),
-        ('posted', 'Posted'),
-        ('cancelled', 'Cancelled')
-    ], required=True, default='draft', readonly=True)
-    index = fields.Char(
-        required=True,
-        readonly=True,
-        states={'draft': [('readonly', False)]},
-    )
-    host_ids = fields.Many2many(
-        'elasticsearch.host',
-        required=True,
-        readonly=True,
-        states={'draft': [('readonly', False)]},
-    )
     model_id = fields.Many2one(
         'ir.model',
-        required=True,
         readonly=True,
         states={'draft': [('readonly', False)]},
     )
@@ -48,15 +25,13 @@ class ElasticsearchIndex(models.Model):
         store=True, readonly=True,
     )
     domain = fields.Char(
-        required=True,
         readonly=True,
         states={'draft': [('readonly', False)]},
         default='[]'
     )
-    document_ids = fields.One2many(
-        'elasticsearch.document',
-        inverse_name='index_id',
-        readonly=True
+
+    type = fields.Selection(
+        selection_add=[('modeler', 'Modeler')]
     )
     document_field_ids = fields.One2many(
         'elasticsearch.document.field',
@@ -65,55 +40,16 @@ class ElasticsearchIndex(models.Model):
         states={'draft': [('readonly', False)]},
     )
 
-    def _post_values(self):
-        return {'state': 'posted'}
-
     def _get_index_template(self):
-        vals = {
-            "settings": {"index.mapping.ignore_malformed": True},
-            "mappings": { '_doc': { 'properties': {
+        vals = super()._get_index_template()
+        vals.update({
+            "mappings": {'_doc': {'properties': {
                 field.field_id.name: field._get_index_values()
                 for field in
                 self.document_field_ids.filtered(lambda r: not r.parent_id)
             }}}
-        }
-        logging.info(vals)
+        })
         return vals
-
-    def _post(self):
-        es = elasticsearch.Elasticsearch(hosts=self.get_hosts())
-        es.indices.create(
-            self.index,
-            body=json.dumps(self._get_index_template()))
-
-    @api.multi
-    def post(self):
-        self.ensure_one()
-        self._post()
-        self.write(self._post_values())
-
-    def _reset_index(self):
-        self.ensure_one()
-        es = elasticsearch.Elasticsearch(hosts=self.get_hosts())
-        self.document_ids.with_context(no_elasticserach_sync=True).unlink()
-        es.indices.delete(index=self.index, ignore=[400, 404])
-        self.state = 'cancelled'
-
-    def _draft_values(self):
-        return {'state': 'draft'}
-
-    @api.multi
-    def restore(self):
-        self.write(self._draft_values())
-
-    def _cancel_values(self):
-        return {'state': 'cancelled'}
-
-    @api.multi
-    def cancel(self):
-        self.ensure_one()
-        self._reset_index()
-        self.write(self._cancel_values())
 
     @api.multi
     def rebuild_documents(self):
@@ -144,6 +80,3 @@ class ElasticsearchIndex(models.Model):
         for rebuild in rebuilds:
             self.env['elasticsearch.document'].browse(rebuild).export_update()
         logging.info("Done")
-
-    def get_hosts(self):
-        return [{"host": r.host, "port": r.port} for r in self.host_ids]

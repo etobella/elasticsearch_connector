@@ -16,13 +16,11 @@
         'views/menu.xml',
         'views/elasticsearch_host_views.xml',
         'views/elasticsearch_index_views.xml',
-        'views/elasticsearch_document_views.xml',
-        'views/elasticsearch_document_field_views.xml',
     ],
     'external_dependencies': {
         'python': [
             'elasticsearch'
         ],
     },
-    'installable': False,
+    'installable': True,
 }

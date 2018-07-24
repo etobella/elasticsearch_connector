@@ -18,8 +18,9 @@ class ElasticsearchIndex(models.Model):
     _inherit = 'connector.backend'
 
     name = fields.Char(
-
-        required=True, readonly=True, states={'draft': [('readonly', False)]},
+        required=True,
+        readonly=True,
+        states={'draft': [('readonly', False)]},
     )
     state = fields.Selection([
         ('draft', 'Draft'),
@@ -37,30 +38,14 @@ class ElasticsearchIndex(models.Model):
         readonly=True,
         states={'draft': [('readonly', False)]},
     )
-    model_id = fields.Many2one(
-        'ir.model',
-        required=True,
-        readonly=True,
-        states={'draft': [('readonly', False)]},
-    )
-    model = fields.Char(
-        related='model_id.model',
-        store=True, readonly=True,
-    )
-    domain = fields.Char(
-        required=True,
-        readonly=True,
-        states={'draft': [('readonly', False)]},
-        default='[]'
-    )
     document_ids = fields.One2many(
         'elasticsearch.document',
         inverse_name='index_id',
         readonly=True
     )
-    document_field_ids = fields.One2many(
-        'elasticsearch.document.field',
-        inverse_name='index_id',
+    type = fields.Selection(
+        [],
+        required=True,
         readonly=True,
         states={'draft': [('readonly', False)]},
     )
@@ -69,16 +54,9 @@ class ElasticsearchIndex(models.Model):
         return {'state': 'posted'}
 
     def _get_index_template(self):
-        vals = {
-            "settings": {"index.mapping.ignore_malformed": True},
-            "mappings": { '_doc': { 'properties': {
-                field.field_id.name: field._get_index_values()
-                for field in
-                self.document_field_ids.filtered(lambda r: not r.parent_id)
-            }}}
+        return {
+            "settings": {"index.mapping.ignore_malformed": True}
         }
-        logging.info(vals)
-        return vals
 
     def _post(self):
         es = elasticsearch.Elasticsearch(hosts=self.get_hosts())
@@ -114,36 +92,6 @@ class ElasticsearchIndex(models.Model):
         self.ensure_one()
         self._reset_index()
         self.write(self._cancel_values())
-
-    @api.multi
-    def rebuild_documents(self):
-        self.ensure_one()
-        domain = safe_eval(self.domain)
-        elements = self.env[self.model].search(domain).ids
-        documents = {r.odoo_id: r.id for r in self.document_ids}
-        creates = []
-        rebuilds = []
-        # Delete unnecessary documents
-        for element in elements:
-            if element in documents:
-                rebuilds.append(documents.pop(element))
-            else:
-                creates.append(element)
-        logging.info("Deleting")
-        for document in documents:
-            self.env['elasticsearch.document'].browse(
-                documents[document]).unlink()
-        logging.info("Creating")
-        for create in creates:
-            self.env['elasticsearch.document'].create({
-                'odoo_id': create,
-                'index_id': self.id,
-                'model': self.model,
-            })
-        logging.info("Updating")
-        for rebuild in rebuilds:
-            self.env['elasticsearch.document'].browse(rebuild).export_update()
-        logging.info("Done")
 
     def get_hosts(self):
         return [{"host": r.host, "port": r.port} for r in self.host_ids]
