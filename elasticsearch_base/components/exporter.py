@@ -7,7 +7,7 @@ import json
 from datetime import datetime
 
 import odoo
-from odoo.addons.component.core import Component
+from odoo.addons.component.core import AbstractComponent, Component
 from odoo.addons.connector.exception import RetryableJobError
 
 _logger = logging.getLogger(__name__)
@@ -19,16 +19,15 @@ except (ImportError, IOError) as err:
 ISO_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'
 
 
-class ElasticsearchBaseExporter(Component):
+class ElasticsearchBaseExporter(AbstractComponent):
     """ Base exporter for the Elasticsearch """
 
-    _name = 'elasticsearch.document.exporter'
+    _name = 'elasticsearch.basic.exporter'
     _inherit = ['base.exporter', 'base.elasticsearch.connector']
     _usage = 'record.exporter'
-    _apply_on = ['elasticsearch.document']
     _exporter_failure_timeout = 2
 
-    def _lock(self, document):
+    def _lock(self, record):
         """ Lock the binding record.
         Lock the binding record so we are sure that only one export
         job is running for this record if concurrent jobs have to export the
@@ -43,28 +42,40 @@ class ElasticsearchBaseExporter(Component):
         sql = ("SELECT id FROM %s WHERE ID = %%s FOR UPDATE NOWAIT" %
                self.model._table)
         try:
-            self.env.cr.execute(sql, (document.id,),
+            self.env.cr.execute(sql, (record.id,),
                                 log_exceptions=False)
         except psycopg2.OperationalError:
             _logger.info('A concurrent job is already exporting the same '
                          'record (%s with id %s). Job delayed later.',
-                         self.model._name, document.id)
+                         self.model._name, record.id)
             raise RetryableJobError(
                 'A concurrent job is already exporting the same record '
                 '(%s with id %s). The job will be retried later.' %
-                (self.model._name, document.id),
+                (self.model._name, record.id),
                 seconds=self._exporter_failure_timeout)
 
-    def es_create(self, document, *args, **kwargs):
-        self._lock(document)
-        index = document.index_id.index
-        es = elasticsearch.Elasticsearch(
-            hosts=document.index_id.get_hosts())
-        data = json.dumps(kwargs['data'])
-        es.index(index, '_doc', id=document.id, body=data)
-        document.with_context(no_elasticserach_sync=True).write({
-            'sync_date': kwargs['sync_date']
-        })
+    def check_send(self, record, index, data, *args, **kwargs):
+        pass
+
+    def not_sended_action(self, record, index, data, *args, **kwargs):
+        pass
+
+    def after_send_action(self, record, index, data, *args, **kwargs):
+        pass
+
+    def es_write(self, record, index, data, *args, **kwargs):
+        self._lock(record)
+        if self.check_send(record, index, data, *args, **kwargs):
+            es = elasticsearch.Elasticsearch(hosts=index.get_hosts())
+            json_data = json.dumps(data)
+            es.index(index.index, '_doc', id=record.id, body=json_data)
+            self.after_send_action(record, index, data, *args, **kwargs)
+        else:
+            self.not_sended_action(record, index, data, *args, **kwargs)
+        # Commit so we keep the external ID when there are several
+        # exports (due to dependencies) and one of them fails.
+        # The commit will also release the lock acquired on the binding
+        # record
         if not odoo.tools.config['test_enable']:
             self.env.cr.commit()  # pylint: disable=E8102
         self._after_export()
@@ -79,40 +90,31 @@ class ElasticsearchBaseExporter(Component):
         self._after_export()
         return True
 
-    def es_write(self, document, *args, **kwargs):
-        """ Run the synchronization
-        :param binding: binding record to export
-        """
-        self._lock(document)
-        sync_date = datetime.strptime(kwargs['sync_date'], ISO_FORMAT)
-        if (
-            not document.sync_date or
-            sync_date >= datetime.strptime(document.sync_date, ISO_FORMAT)
-        ):
-            index = document.index_id.index
-            es = elasticsearch.Elasticsearch(
-                hosts=document.index_id.get_hosts())
-            data = json.dumps(kwargs['data'])
-            es.index(index, '_doc', id=document.id, body=data)
-            document.with_context(no_elasticserach_sync=True).write({
-                'sync_date': kwargs['sync_date']
-            })
-        else:
-            _logger.info(
-                'Record from %s with id %s has already been sended (%s), so it'
-                ' is deprecated ' % (
-                    self.model._name, document.id, kwargs['sync_date']
-                )
-            )
-        # Commit so we keep the external ID when there are several
-        # exports (due to dependencies) and one of them fails.
-        # The commit will also release the lock acquired on the binding
-        # record
-        if not odoo.tools.config['test_enable']:
-            self.env.cr.commit()  # pylint: disable=E8102
-        self._after_export()
-        return True
-
     def _after_export(self):
         """ Can do several actions after exporting a record"""
         pass
+
+
+class ElasticsearchDocumentExporter(Component):
+    _name = 'elasticsearch.document.exporter'
+    _inherit = 'elasticsearch.basic.exporter'
+    _apply_on = ['elasticsearch.document']
+
+    def check_send(self, record, index, data, *args, **kwargs):
+        sync_date = datetime.strptime(kwargs['sync_date'], ISO_FORMAT)
+        return (
+            not record.sync_date or
+            sync_date >= datetime.strptime(record.sync_date, ISO_FORMAT))
+
+    def not_sended_action(self, record, index, data, *args, **kwargs):
+        _logger.info(
+            'Record from %s with id %s has already been sended (%s), so it'
+            ' is deprecated ' % (
+                self.model._name, record.id, kwargs['sync_date']
+            )
+        )
+
+    def after_send_action(self, record, index, data, *args, **kwargs):
+        record.with_context(no_elasticserach_sync=True).write({
+            'sync_date': kwargs['sync_date']
+        })

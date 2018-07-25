@@ -26,9 +26,9 @@ class ElasticsearchDocument(models.Model):
         self.ensure_one()
         with self.index_id.work_on(self._name) as work:
             exporter = work.component(usage='record.exporter')
-            return exporter.es_create(
+            return exporter.es_write(
                 self,
-                data=self.get_document_values(),
+                self.get_document_values(),
                 sync_date=date)
 
     @job(default_channel='root.elasticsearch')
@@ -39,7 +39,7 @@ class ElasticsearchDocument(models.Model):
             exporter = work.component(usage='record.exporter')
             return exporter.es_write(
                 self,
-                data=self.get_document_values(),
+                self.get_document_values(),
                 sync_date=date)
 
     @job(default_channel='root.elasticsearch')

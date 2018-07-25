@@ -29,4 +29,4 @@ class ElasticsearchDocumentListener(Component):
             for rec in record:
                 rec.export_delete(rec.id, rec.index_id)
         for rec in record:
-            rec.with_delay()
+            rec.with_delay().export_delete(rec.id, rec.index_id)

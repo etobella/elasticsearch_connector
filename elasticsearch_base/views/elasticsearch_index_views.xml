@@ -37,6 +37,9 @@
                         <page name="host" string="Hosts">
                             <field name="host_ids" options="{'no_create': True}"/>
                         </page>
+                        <page name="settings" string="Settings">
+                            <field name="template_settings" widget="ace"/>
+                        </page>
                     </notebook>
                 </sheet>
             </form>

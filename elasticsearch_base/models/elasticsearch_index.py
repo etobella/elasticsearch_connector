@@ -1,7 +1,8 @@
 # Copyright 2017 Creu Blanca
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 import logging
-from odoo import api, fields, models
+from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError
 from odoo.tools import safe_eval
 import json
 
@@ -49,14 +50,27 @@ class ElasticsearchIndex(models.Model):
         readonly=True,
         states={'draft': [('readonly', False)]},
     )
+    template_settings = fields.Text(
+        default='{}',
+        readonly=True,
+        states={'draft': [('readonly', False)]},
+    )
 
     def _post_values(self):
         return {'state': 'posted'}
 
+    @api.constrains('template_settings')
+    def _check_template_settings(self):
+        settings = safe_eval(self.template_settings or '{}')
+        if not isinstance(settings,dict):
+            raise ValidationError(_('Template settings must be a dictionary'))
+
     def _get_index_template(self):
-        return {
+        settings = {
             "settings": {"index.mapping.ignore_malformed": True}
         }
+        settings["settings"].update(safe_eval(self.template_settings or "{}"))
+        return settings
 
     def _post(self):
         es = elasticsearch.Elasticsearch(hosts=self.get_hosts())
