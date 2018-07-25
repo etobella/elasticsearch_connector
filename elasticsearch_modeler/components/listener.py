@@ -17,3 +17,6 @@ class BaseDocumentListener(Component):
         if getattr(record, 'es_document_ids', False):
             for doc in record.es_document_ids:
                 doc.with_delay().export_update(datetime.now().isoformat())
+
+    def on_record_unlink(self, record):
+        pass

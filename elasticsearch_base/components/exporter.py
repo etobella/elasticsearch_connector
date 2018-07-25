@@ -81,10 +81,14 @@ class ElasticsearchBaseExporter(AbstractComponent):
         self._after_export()
         return True
 
+    def es_direct_write(self, id, index, data, *args, **kwargs):
+        es = elasticsearch.Elasticsearch(hosts=index.get_hosts())
+        json_data = json.dumps(data)
+        es.index(index.index, '_doc', id=id, body=json_data)
+        self._after_export()
+        return True
+
     def es_unlink(self, id, index, *args, **kwargs):
-        """ Run the synchronization
-        :param binding: binding record to export
-        """
         es = elasticsearch.Elasticsearch(hosts=index.get_hosts())
         es.delete(index.index, '_doc', id)
         self._after_export()
