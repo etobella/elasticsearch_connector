@@ -1,6 +1,7 @@
 # Copyright 2018 Creu Blanca
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 from odoo import api, fields, models
+from odoo.tools import safe_eval
 
 
 class ElasticsearchIndex(models.Model):
@@ -17,6 +18,12 @@ class ElasticsearchIndex(models.Model):
     )
     last_update = fields.Datetime(
         readonly=True
+    )
+    cron_domain = fields.Text(
+        default='[]',
+        help="The domain should be of fields that don't change",
+        readonly=True,
+        states={'draft': [('readonly', False)]},
     )
 
     def _post_values(self):
@@ -36,7 +43,7 @@ class ElasticsearchIndex(models.Model):
         }
 
     def _get_cron_domain(self):
-        res = []
+        res = safe_eval(self.cron_domain)
         if self.last_update:
             res.append(('write_date', '>', self.last_update))
         return res
