@@ -37,21 +37,24 @@ class Base(models.AbstractModel):
                 ('model', '=', self._name)
             ])
 
+    @api.model
+    def index_domain(self):
+        return [
+            ('state', '=', 'posted'),
+            ('model', '=', self._name)
+        ]
+
     @job(default_channel='root.elasticsearch')
     @api.multi
     def check_elasticsearch(self):
         self.ensure_one()
-        indexes = self.env['elasticsearch.index'].search([
-            ('state', '=', 'posted'),
-            ('model', '=', self._name)
-        ])
+        indexes = self.env['elasticsearch.index'].search(self.index_domain())
         for index in indexes:
-            if self.search([('id', '=', self.id)] + safe_eval(index.domain)):
-                self.env['elasticsearch.document'].create({
-                    'index_id': index.id,
-                    'model': self._name,
-                    'odoo_id': self.id,
-                })
+            self.env['elasticsearch.document'].create({
+                'index_id': index.id,
+                'model': self._name,
+                'odoo_id': self.id,
+            })
 
     def read_elasticsearch(self, flds):
         self.ensure_one()
@@ -62,25 +65,26 @@ class Base(models.AbstractModel):
         usual_fields = flds.filtered(
             lambda r: r.field_type not in ['many2many', 'one2many', 'many2one']
         )
-        res = self.read(usual_fields.mapped('field_id').mapped('name'))[0]
+        aux = self.read(usual_fields.mapped('field_id').mapped('name'))[0]
+        res = dict()
         # Datetime fields must be converted to isoformat.
-        for field in usual_fields.mapped('field_id').mapped('name'):
+        for field in usual_fields:
+            field_name = field.field_id.name
             if isinstance(
-                self._fields.get(field), fields.Datetime
+                self._fields.get(field_name), fields.Datetime
             ):
-                if res[field]:
-                    res[field] = to_datetime(res[field]).isoformat()
-                else:
-                    del res[field]
+                if aux[field_name]:
+                    res[field.name] = to_datetime(aux[field_name]).isoformat()
+            else:
+                res[field.name] = aux[field_name]
         for field in x2many_fields:
             vals = []
             child_fields = field.child_ids
             for rec in getattr(self, field.field_id.name):
                 vals.append(rec.read_elasticsearch(child_fields))
-            res[field.field_id.name] = vals
+            res[field.name] = vals
         for field in many2one_fields:
             value = getattr(self, field.field_id.name)
             if value:
-                res[field.field_id.name] = value.read_elasticsearch(
-                    field.child_ids)
+                res[field.name] = value.read_elasticsearch(field.child_ids)
         return res

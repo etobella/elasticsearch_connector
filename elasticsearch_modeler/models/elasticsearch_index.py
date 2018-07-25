@@ -24,12 +24,6 @@ class ElasticsearchIndex(models.Model):
         related='model_id.model',
         store=True, readonly=True,
     )
-    domain = fields.Char(
-        readonly=True,
-        states={'draft': [('readonly', False)]},
-        default='[]'
-    )
-
     type = fields.Selection(
         selection_add=[('modeler', 'Modeler')]
     )
@@ -44,7 +38,7 @@ class ElasticsearchIndex(models.Model):
         vals = super()._get_index_template()
         vals.update({
             "mappings": {'_doc': {'properties': {
-                field.field_id.name: field._get_index_values()
+                field.name: field._get_index_values()
                 for field in
                 self.document_field_ids.filtered(lambda r: not r.parent_id)
             }}}
@@ -54,8 +48,7 @@ class ElasticsearchIndex(models.Model):
     @api.multi
     def rebuild_documents(self):
         self.ensure_one()
-        domain = safe_eval(self.domain)
-        elements = self.env[self.model].search(domain).ids
+        elements = self.env[self.model].search([]).ids
         documents = {r.odoo_id: r.id for r in self.document_ids}
         creates = []
         rebuilds = []

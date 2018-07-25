@@ -6,6 +6,7 @@
         <field name="model">elasticsearch.document.field</field>
         <field name="arch" type="xml">
             <tree string="Fields">
+                <field name="name"/>
                 <field name="field_id"/>
                 <field name="index_id" invisible="1"/>
                 <field name="model_id" invisible="1"/>
@@ -21,6 +22,7 @@
                 <sheet>
                     <group>
                         <field name="field_id"/>
+                        <field name="name"/>
                         <field name="model_id"/>
                         <field name="parent_id" invisible="1"/>
                         <field name="field_type"/>
@@ -29,6 +31,7 @@
                     <field name="child_ids"
                            attrs="{'invisible': [('field_type', 'not in', ['many2one', 'one2many', 'many2many'])]}"
                     />
+                    <field name="elasticsearch_settings" widget="ace"/>
                 </sheet>
             </form>
         </field>

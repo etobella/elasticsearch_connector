@@ -15,14 +15,13 @@
                 <newline  attrs="{'required': [('type', '=', 'modeler')], 'invisible': [('type', '!=', 'modeler')]}"/>
                 <field name="model_id" attrs="{'required': [('type', '=', 'modeler')], 'invisible': [('type', '!=', 'modeler')]}"/>
                 <field name="model" attrs="{'invisible': [('type', '!=', 'modeler')]}"/>
-                <field name="domain"  attrs="{'required': [('type', '=', 'modeler')], 'invisible': [('type', '!=', 'modeler')]}"/>
             </field>
-            <notebook position="inside">
+            <page name="host" position="before">
                 <page name="fields" string="Fields" attrs="{'required': [('type', '=', 'modeler')], 'invisible': [('type', '!=', 'modeler')]}">
                     <field name="document_field_ids"
                            context="{'default_index_id': active_id}"/>
                 </page>
-            </notebook>
+            </page>
         </field>
     </record>
 

@@ -2,7 +2,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 
 {
-    'name': 'Elasticsearch Connector Base',
+    'name': 'Elasticsearch modeler',
     'version': '11.0.1.0.1',
     'category': 'Elasticsearch connector',
     'depends': [

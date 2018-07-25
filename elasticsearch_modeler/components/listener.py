@@ -10,10 +10,7 @@ class BaseDocumentListener(Component):
     _inherit = 'base.event.listener'
 
     def on_record_create(self, record, fields):
-        if self.env['elasticsearch.index'].search([
-            ('state', '=', 'posted'),
-            ('model', '=', record._name)
-        ]):
+        if self.env['elasticsearch.index'].search(record.index_domain()):
             record.with_delay().check_elasticsearch()
 
     def on_record_write(self, record, fields):
