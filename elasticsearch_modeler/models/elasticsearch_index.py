@@ -1,15 +1,6 @@
 # Copyright 2017 Creu Blanca
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
-import logging
 from odoo import api, fields, models
-from odoo.tools import safe_eval
-import json
-
-_logger = logging.getLogger(__name__)
-try:
-    import elasticsearch
-except (ImportError, IOError) as err:
-    _logger.debug(err)
 
 
 class ElasticsearchIndex(models.Model):

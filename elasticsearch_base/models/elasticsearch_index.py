@@ -62,7 +62,7 @@ class ElasticsearchIndex(models.Model):
     @api.constrains('template_settings')
     def _check_template_settings(self):
         settings = safe_eval(self.template_settings or '{}')
-        if not isinstance(settings,dict):
+        if not isinstance(settings, dict):
             raise ValidationError(_('Template settings must be a dictionary'))
 
     def _get_index_template(self):

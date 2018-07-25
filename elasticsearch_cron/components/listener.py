@@ -2,7 +2,6 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 
 from odoo.addons.component.core import Component
-from datetime import datetime
 
 
 class BaseDocumentListener(Component):

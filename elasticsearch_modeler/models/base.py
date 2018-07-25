@@ -3,7 +3,6 @@
 from datetime import datetime, date
 from odoo import api, fields, models
 from odoo.addons.queue_job.job import job
-from odoo.tools import safe_eval
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
 

@@ -1,7 +1,7 @@
 # Copyright 2017 Creu Blanca
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 
-from odoo import api, models, fields
+from odoo import models, fields
 
 
 class ElasticsearchDocument(models.Model):
@@ -14,7 +14,9 @@ class ElasticsearchDocument(models.Model):
 
     def get_document_values(self):
         if self.index_id.type == 'modeler':
-            return self.env[self.model].browse(self.odoo_id).read_elasticsearch(
+            return self.env[self.model].browse(
+                self.odoo_id
+            ).read_elasticsearch(
                 self.index_id.document_field_ids.filtered(
                     lambda r: not r.parent_id)
             )

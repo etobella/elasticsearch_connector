@@ -38,7 +38,7 @@ class ElasticsearchIndex(models.Model):
     def _get_cron_domain(self):
         res = []
         if self.last_update:
-            res.append(('write_date', '>',self.last_update))
+            res.append(('write_date', '>', self.last_update))
         return res
 
     @api.multi
