@@ -28,6 +28,7 @@ class ElasticsearchDocument(models.Model):
             exporter = work.component(usage='record.exporter')
             return exporter.es_write(
                 self,
+                self.index_id,
                 self.get_document_values(),
                 sync_date=date)
 
@@ -39,6 +40,7 @@ class ElasticsearchDocument(models.Model):
             exporter = work.component(usage='record.exporter')
             return exporter.es_write(
                 self,
+                self.index_id,
                 self.get_document_values(),
                 sync_date=date)
 
