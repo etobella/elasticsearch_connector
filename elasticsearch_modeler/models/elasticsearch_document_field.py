@@ -87,7 +87,7 @@ class ElasticsearchDocument(models.Model):
                 record.model_id = record.index_id.model_id
 
     def _get_index_values(self):
-        #TODO: Check recursivity
+        # TODO: Check recursivity
         vals = {
             'type': INDEX_TYPE[self.field_type]
         }
