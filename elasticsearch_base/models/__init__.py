@@ -4,4 +4,3 @@
 from . import elasticsearch_document
 from . import elasticsearch_host
 from . import elasticsearch_index
-from . import elasticsearch_model

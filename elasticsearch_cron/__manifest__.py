@@ -2,7 +2,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 
 {
-    'name': 'Elasticsearch modeler with cron',
+    'name': 'Elasticsearch cron',
     'version': '11.0.1.0.1',
     'category': 'Elasticsearch connector',
     'depends': [
@@ -10,7 +10,7 @@
     ],
     'author': 'Creu Blanca',
     'license': 'AGPL-3',
-    'summary': 'Elasticsearch connector base',
+    'summary': 'Elasticsearch cron',
     'data': [
         'views/elasticsearch_index_views.xml',
     ],

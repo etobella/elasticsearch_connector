@@ -10,7 +10,7 @@
     ],
     'author': 'Creu Blanca',
     'license': 'AGPL-3',
-    'summary': 'Elasticsearch connector base',
+    'summary': 'Elasticsearch Direct modeler',
     'data': [
         'views/elasticsearch_index_views.xml',
     ],
